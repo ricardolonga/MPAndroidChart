@@ -7,6 +7,7 @@ import com.github.mikephil.charting.data.realm.base.RealmBarLineScatterCandleBub
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 
 import io.realm.DynamicRealmObject;
+import io.realm.RealmFieldType;
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.RealmResults;
@@ -79,10 +80,17 @@ public class RealmBarDataSet<T extends RealmObject> extends RealmBarLineScatterC
             DynamicRealmObject dynamicObject = new DynamicRealmObject(realmObject);
 
             try {
+                RealmFieldType fieldType = dynamicObject.getFieldType(mValuesField);
 
-                float value = dynamicObject.getFloat(mValuesField);
-                mValues.add(new BarEntry(value, dynamicObject.getInt(mIndexField)));
+                if (fieldType == RealmFieldType.FLOAT) {
+                    float value = dynamicObject.getFloat(mValuesField);
+                    mValues.add(new BarEntry(value, dynamicObject.getInt(mIndexField)));
+                }
 
+                if (fieldType == RealmFieldType.DOUBLE) {
+                    Double value = dynamicObject.getDouble(mValuesField);
+                    mValues.add(new BarEntry(value.floatValue(), dynamicObject.getInt(mIndexField)));
+                }
             } catch (IllegalArgumentException e) {
 
                 RealmList<DynamicRealmObject> list = dynamicObject.getList(mValuesField);
